@@ -126,34 +126,20 @@
           :url="'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png'"
         />
         <Vue2LeafletHeatmap
-          :key="forceRerender"
+          :key="latlongarray.length"
           :lat-lng="latlongarray"
-          :radius="50"
-          :min-opacity="0.35"
+          :radius="100 - currentZoom * 5"
+          :min-opacity="0.45"
           :max-zoom="12"
-          :blur="60"
+          :blur="50"
         ></Vue2LeafletHeatmap>
-        <!-- <template v-if="mapData">
-          <template v-for="(k, ix) in mapData">
-            <l-geo-json
-              v-if="mapData[ix]"
-              :key="ix"
-              :geojson="k"
-              :options="options"
-            />
-          </template>
-        </template> -->
-        <!-- <l-geo-json v-if="baseMap" :geojson="baseMap" :options="options" /> -->
       </l-map>
     </client-only>
-    <v-btn @click="latlongarray.pop()">{minus}</v-btn>
-    {{ locationsOfParties.FDP }}
   </div>
 </template>
 <script>
 import 'leaflet/dist/leaflet.css'
 import Vue2LeafletHeatmap from '@/components/Vue2LeafletHeatmap'
-import { mapState } from 'vuex'
 export default {
   components: {
     Vue2LeafletHeatmap,
@@ -246,78 +232,17 @@ export default {
           ],
         },
       ],
-
       latlongarray: [],
       latLongHilfsArray: [],
-      forceRerender: 0,
-      activeHeatmaps: [],
       heatmapQueryNames: ['LDP', 'FDP', 'SP', 'MITTE/EVP', 'GLP', 'GAB', 'SVP'],
       baseMap: null,
-      filterOptions: [],
-      heatMapData: [[7.573249109845295, 47.56134861836904]],
-      currentZoom: null,
-      options: {
-        style(feature) {
-          if (!feature && !feature.properties) return
-          return {
-            weight: 0.3,
-            color: 'black',
-            fillOpacity: 0.5,
-            fillColor: feature.properties.styles
-              ? feature.properties.styles.color
-              : 'transparent',
-          }
-        },
-        onEachFeature(feature, layer) {
-          if (feature.properties.OBJID) return
-          layer.bindPopup(
-            `${Object.keys(feature.properties)
-              .filter((x) => !x.includes('json') && !x.includes('styles'))
-              .map((e) => {
-                return `<span><strong>${e}</strong>: ${feature.properties[e]}</span><br />`
-              })
-              .join('')}
-                    `
-          )
-          layer.on('mouseover', function () {
-            layer.setStyle({
-              fillColor: 'transparent',
-              fillOpacity: 0.2,
-              weight: 0.8,
-              color: feature.properties.styles
-                ? feature.properties.styles.color
-                : 'black',
-            })
-          })
-          layer.on('mouseout', function (e) {
-            layer.setStyle({
-              weight: 0.3,
-              fillColor: feature.properties.styles
-                ? feature.properties.styles.color
-                : 'gray',
-              fillOpacity: 0.5,
-              color: 'black',
-            })
-          })
-        },
-      },
+      currentZoom: 12,
     }
   },
   async fetch() {
     // await this.$store.dispatch('fetchMap', {
     //   id: this.$route.query.id || null,
     // })
-  },
-  computed: {
-    ...mapState({
-      total: (state) => state.total || null,
-      mapData: (state) => state.mapData || [],
-      showFilter: (state) => state.showLegend || false,
-      mapFilters: (state) => state.mapFilters || [],
-      mapLegend: (state) => state.mapLegend || [],
-      mapSection: (state) => state.mapSection || [],
-      mapColors: (state) => state.mapColors || [],
-    }),
   },
   watch: {
     activeHeatmaps() {
@@ -345,9 +270,6 @@ export default {
     // handle heat map
     this.initHeatmap()
     // handle legends
-    if (this.mapLegend.length > 0) {
-      this.filterOptions.push(this.mapLegend)
-    }
   },
   methods: {
     async initHeatmap() {
@@ -388,7 +310,6 @@ export default {
 
       this.latlongarray = this.latLongHilfsArray
       console.log(this.latlongarray)
-      this.forceRerender++
       this.latLongHilfsArray = []
     },
     setZoom(v) {
