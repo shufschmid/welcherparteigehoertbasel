@@ -12,25 +12,6 @@ export const state = () => ({
 })
 
 export const mutations = {
-  addFile(state, file) {
-    // .log(file[0].name)
-    state.uploads.push({
-      id: state.uploads.length + 1,
-      file,
-    })
-    // console.log(state.uploads)
-  },
-  addFilters(state, filters) {
-    const keys = Object.keys(...filters)
-    filters.forEach((x) => {
-      if (!state.mapLegend.includes(x[keys[0]])) {
-        state.mapLegend.push(x[keys[0]])
-        state.mapSection.push([keys[0]])
-        state.mapColors[x[keys[0]]] = x[keys[1]]
-      }
-    })
-    state.mapFilters.push(filters)
-  },
   filterMap(state, file) {
     if (!localStorage.getItem(file.id || 'defaultMap')) {
       localStorage.setItem(

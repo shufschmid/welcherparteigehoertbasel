@@ -1,6 +1,5 @@
 <template>
   <div id="map-wrap" style="height: 100vh">
-    <Nav style="position: absolute; z-index: 9999"></Nav>
     <div
       class="wgb__zoom flex flex-wrapper"
       style="
@@ -105,45 +104,35 @@
       </button>
     </div>
     <div class="querySelector">
-      <div v-for="(n, index) in heatmapQueryNames.length" :key="index">
-        <input
-          :id="n - 1"
-          v-model="activeHeatmaps"
-          type="checkbox"
-          :value="n - 1"
+      <div v-for="(element, index) in locationsOfParties" :key="index">
+        <v-checkbox
+          :id="element.party"
+          v-model="element.visible"
+          :label="element.party"
+          light
+          @change="setHeatmap(element.party)"
         />
-        <label :for="n - 1">{{ heatmapQueryNames[n - 1] }}</label>
       </div>
       <br />
     </div>
     <client-only>
-      <l-map
-        ref="map"
-        :zoom="!!$route.query.zoom ? parseInt($route.query.zoom) : 14"
-        :center="
-          !!$route.query.center
-            ? JSON.parse($route.query.center)
-            : [47.5686, 7.56797]
-        "
-      >
+      <l-map ref="map" :zoom="14" :center="[47.5586, 7.60097]">
         <l-tile-layer
           :options="{
-            maxZoom: $route.query.heatmap ? 15 : 18,
+            maxZoom: 18,
             minZoom: 3.5,
           }"
-          :url="
-            $route.query.tile ||
-            'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png'
-          "
+          :url="'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png'"
         />
         <Vue2LeafletHeatmap
+          :key="forceRerender"
           :lat-lng="latlongarray"
           :radius="50"
           :min-opacity="0.35"
           :max-zoom="12"
           :blur="60"
         ></Vue2LeafletHeatmap>
-        <template v-if="mapData">
+        <!-- <template v-if="mapData">
           <template v-for="(k, ix) in mapData">
             <l-geo-json
               v-if="mapData[ix]"
@@ -152,10 +141,12 @@
               :options="options"
             />
           </template>
-        </template>
-        <l-geo-json v-if="baseMap" :geojson="baseMap" :options="options" />
+        </template> -->
+        <!-- <l-geo-json v-if="baseMap" :geojson="baseMap" :options="options" /> -->
       </l-map>
     </client-only>
+    <v-btn @click="latlongarray.pop()">{minus}</v-btn>
+    {{ locationsOfParties.FDP }}
   </div>
 </template>
 <script>
@@ -168,15 +159,30 @@ export default {
   },
   data() {
     return {
-      latlongarray: [
-        [47.56134861836904, 7.573249109845295],
-        [47.5473240607612, 7.611666239140061],
-        [47.56820800248657, 7.615186910257345],
-        [47.56898526814444, 7.616742012682842],
+      locationsOfParties: [
+        {
+          party: 'LDP',
+          visible: true,
+          locations: [
+            [47.56134861836904, 7.573249109845295],
+            [47.5473240607612, 7.611666239140061],
+          ],
+        },
+        {
+          party: 'FDP',
+          visible: true,
+          locations: [
+            [47.56820800248657, 7.615186910257345],
+            [47.56898526814444, 7.616742012682842],
+          ],
+        },
       ],
+
+      latlongarray: [],
+      latLongHilfsArray: [],
       forceRerender: 0,
       activeHeatmaps: [],
-      heatmapQueryNames: [],
+      heatmapQueryNames: ['LDP', 'SVP'],
       baseMap: null,
       filterOptions: [],
       heatMapData: [[7.573249109845295, 47.56134861836904]],
@@ -258,6 +264,7 @@ export default {
     }
   },
   async mounted() {
+    this.setHeatmap()
     // clear filters
     this.filterOptions = []
     // handle base map
@@ -275,7 +282,7 @@ export default {
   },
   methods: {
     async initHeatmap() {
-      if (this.$route.query) {
+      if (!this.$route.query) {
         this.heatMapData = []
         const tempActiveHeatmaps = []
         let index = 0
@@ -290,11 +297,7 @@ export default {
               .then((res) => {
                 this.heatmapQueryNames.push(res.data.name)
                 const r = res.data.features.forEach((e) =>
-                  this.heatMapData.push([
-                    e.geometry.coordinates[1],
-                    e.geometry.coordinates[0],
-                    1,
-                  ])
+                  this.heatMapData.pop()
                 )
                 tempActiveHeatmaps.push(index)
                 index++
@@ -305,38 +308,19 @@ export default {
         this.activeHeatmaps = tempActiveHeatmaps
       }
     },
-    async setHeatmap() {
-      if (this.$route.query) {
-        this.heatMapData = []
-        let index = 0
-        const fetchUrl = `${
-          process.env.NODE_ENV === 'production' ? '' : process.env.BASE_URL
-        }.netlify/functions/`
-        for (const queryName in this.$route.query) {
-          const queryUrl = this.$route.query[queryName]
-          if (queryUrl.startsWith('http') && queryUrl.endsWith('.json')) {
-            if (
-              this.activeHeatmaps.find((heatmap) => heatmap === index) !==
-              undefined
-            ) {
-              await this.$axios
-                .$post(fetchUrl + 'heatmaps', { url: queryUrl })
-                .then((res) => {
-                  const r = res.data.features.forEach((e) =>
-                    this.heatMapData.push([
-                      e.geometry.coordinates[1],
-                      e.geometry.coordinates[0],
-                      1,
-                    ])
-                  )
-                  return r
-                })
-            }
-            index++
-            this.forceRerender++
-          }
+    setHeatmap() {
+      this.locationsOfParties.forEach((element) => {
+        if (element.visible === true) {
+          element.locations.forEach((e) => {
+            this.latLongHilfsArray.push(e)
+          })
         }
-      }
+      })
+
+      this.latlongarray = this.latLongHilfsArray
+      console.log(this.latlongarray)
+      this.forceRerender++
+      this.latLongHilfsArray = []
     },
     setZoom(v) {
       if (!this.$refs.map) return
