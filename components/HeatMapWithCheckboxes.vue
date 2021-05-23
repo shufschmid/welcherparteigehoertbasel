@@ -62,15 +62,20 @@
 </template>
 <script>
 import 'leaflet/dist/leaflet.css'
-import locationsOfPartiesData from '@/data/locationsOfParties.json'
+
 import Vue2LeafletHeatmap from '@/components/Vue2LeafletHeatmap'
 export default {
   components: {
     Vue2LeafletHeatmap,
   },
+  props: {
+    locationsOfParties: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
-      locationsOfParties: locationsOfPartiesData,
       latlongarray: [],
       latLongHilfsArray: [],
       center: [47.5586, 7.60097],
