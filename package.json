@@ -12,9 +12,11 @@
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.13.1",
+    "apexcharts": "^3.26.3",
     "core-js": "^3.9.1",
     "leaflet": "^1.7.1",
     "nuxt": "^2.15.3",
+    "vue-apexcharts": "^1.6.1",
     "vue2-leaflet": "^2.7.0",
     "zingchart": "^2.9.4",
     "zingchart-vue": "^2.0.3"
