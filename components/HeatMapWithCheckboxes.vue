@@ -3,33 +3,35 @@
     <v-col cols="12">
       <div id="map-wrap" style="height: 100vh">
         <div class="querySelector">
-          <v-icon
-            large
-            color="black"
-            :disabled="currentZoom <= minZoom"
-            @click="setZoom('+')"
-          >
-            mdi-magnify-minus-outline
-          </v-icon>
-          <v-icon
-            large
-            color="black"
-            :disabled="currentZoom >= maxZoom"
-            @click="setZoom('-')"
-          >
-            mdi-magnify-plus-outline
-          </v-icon>
-          <v-checkbox
-            v-for="(element, index) in locationsOfParties"
-            :id="element.party"
-            :key="index"
-            v-model="element.visible"
-            :label="element.party"
-            light
-            dense
-            style="margin: 0px; padding: 0px"
-            @change="setHeatmap(element.party)"
-          />
+          <div>
+            <v-icon
+              large
+              color="black"
+              :disabled="currentZoom <= minZoom"
+              @click="setZoom('+')"
+            >
+              mdi-magnify-minus-outline
+            </v-icon>
+            <v-icon
+              large
+              color="black"
+              :disabled="currentZoom >= maxZoom"
+              @click="setZoom('-')"
+            >
+              mdi-magnify-plus-outline
+            </v-icon>
+            <v-checkbox
+              v-for="(element, index) in locationsOfParties"
+              :id="element.party"
+              :key="index"
+              v-model="element.visible"
+              :label="element.party"
+              light
+              dense
+              style="margin: 0px; padding: 0px"
+              @change="setHeatmap(element.party)"
+            />
+          </div>
         </div>
         <client-only>
           <l-map
@@ -115,8 +117,8 @@ export default {
 </script>
 <style lang="scss">
 .querySelector {
-  position: fixed;
-  right: 100px;
+  position: absolute;
+  right: 20px;
   top: 80px;
   display: flex;
   flex-direction: column;

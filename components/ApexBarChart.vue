@@ -8,8 +8,8 @@
         :series="series"
       ></VueApexCharts>
       Dann sagte ein LDP-Politiker: Das hat ja nur mit dem höheren
-      Durschnittsalter in unserer Fraktion zu tun. Wollen wir das überprüfen?
-      <button @click="updateChart">Update!</button>
+      Durschnittsalter in unserer Fraktion zu tun.
+      <a @click="updateChart">Wollen wir das überprüfen?</a>
     </div>
   </div>
 </template>
