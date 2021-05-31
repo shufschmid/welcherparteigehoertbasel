@@ -12,6 +12,25 @@ export const state = () => ({
 })
 
 export const mutations = {
+  addFile(state, file) {
+    // .log(file[0].name)
+    state.uploads.push({
+      id: state.uploads.length + 1,
+      file,
+    })
+    // console.log(state.uploads)
+  },
+  addFilters(state, filters) {
+    const keys = Object.keys(...filters)
+    filters.forEach((x) => {
+      if (!state.mapLegend.includes(x[keys[0]])) {
+        state.mapLegend.push(x[keys[0]])
+        state.mapSection.push([keys[0]])
+        state.mapColors[x[keys[0]]] = x[keys[1]]
+      }
+    })
+    state.mapFilters.push(filters)
+  },
   filterMap(state, file) {
     if (!localStorage.getItem(file.id || 'defaultMap')) {
       localStorage.setItem(
@@ -67,7 +86,12 @@ export const mutations = {
         },
         geometry: {
           type: 'MultiPolygon',
-          coordinates: [JSON.parse(item.data[i].json)],
+          // coordinates: [JSON.parse(item.data[i].json)],
+          coordinates: [
+            JSON.parse(
+              '[ [ [ 7.58854489752366,47.553205337774827 ], [ 7.588736751598573,47.553159186774892 ], [ 7.588656362535943,47.553017045197919 ], [ 7.588558037768171,47.553049576183618 ], [ 7.5884567986896,47.553085150717564 ], [ 7.588539679985239,47.553206594616142 ], [ 7.58854489752366,47.553205337774827] ] ]'
+            ),
+          ],
         },
       })
       forFilter.push(

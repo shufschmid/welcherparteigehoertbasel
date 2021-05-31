@@ -1,6 +1,10 @@
 <template>
   <v-row>
     <v-col cols="12">
+      Da sagte einer:
+      <a @click="showOnlyLDP"
+        >"Schau mal die vielen Häuser, die die LDP hat!"</a
+      >
       <div id="map-wrap" style="height: 100vh">
         <div class="querySelector">
           <div>
@@ -98,6 +102,21 @@ export default {
           element.locations.forEach((e) => {
             this.latLongHilfsArray.push(e)
           })
+        }
+      })
+      this.latlongarray = this.latLongHilfsArray
+      this.latLongHilfsArray = []
+    },
+    showOnlyLDP() {
+      this.locationsOfParties.forEach((element) => {
+        if (element.party === 'LDP') {
+          element.visible = true
+
+          element.locations.forEach((e) => {
+            this.latLongHilfsArray.push(e)
+          })
+        } else {
+          element.visible = false
         }
       })
       this.latlongarray = this.latLongHilfsArray
